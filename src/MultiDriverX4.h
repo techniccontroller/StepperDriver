@@ -13,12 +13,12 @@
 #include <Arduino.h>
 #include "BasicStepperDriver.h"
 
-#define MAX_MOTORS 3    // a reasonable but arbitrary limit
+#define MAX_MOTORS 4    // a reasonable but arbitrary limit
 #define Motor BasicStepperDriver
 /*
  * Multi-motor group driver class.
  */
-class MultiDriver {
+class MultiDriverX4 {
 protected:
     /*
      * Configuration
@@ -28,7 +28,7 @@ protected:
     /*
      * Generic initializer, will be called by the others
      */
-    MultiDriver(const unsigned short count, Motor* const *motors)
+    MultiDriverX4(const unsigned short count, Motor* const *motors)
     :count(count), motors(motors)
     {};
 
@@ -46,14 +46,20 @@ public:
     /*
      * Two-motor setup
      */
-    MultiDriver(Motor& motor1, Motor& motor2)
-    :MultiDriver(2, new Motor* const[2]{&motor1, &motor2})
+    MultiDriverX4(Motor& motor1, Motor& motor2)
+    :MultiDriverX4(2, new Motor* const[2]{&motor1, &motor2})
     {};
     /*
      * Three-motor setup (X, Y, Z for example)
      */
-    MultiDriver(Motor& motor1, Motor& motor2, Motor& motor3)
-    :MultiDriver(3, new Motor* const[3]{&motor1, &motor2, &motor3})
+    MultiDriverX4(Motor& motor1, Motor& motor2, Motor& motor3)
+    :MultiDriverX4(3, new Motor* const[3]{&motor1, &motor2, &motor3})
+    {};
+    /*
+     * Four-motor setup (mecanum wheel robot for example)
+     */
+    MultiDriverX4(Motor& motor1, Motor& motor2, Motor& motor3, Motor& motor4)
+    :MultiDriverX4(4, new Motor* const[4]{&motor1, &motor2, &motor3, &motor4})
     {};
     unsigned short getCount(void){
         return count;
@@ -65,22 +71,22 @@ public:
      * Move the motors a given number of steps.
      * positive to move forward, negative to reverse
      */
-    void move(long steps1, long steps2, long steps3=0);
-    void rotate(int deg1, int deg2, int deg3=0){
-        rotate((long)deg1, (long)deg2, (long)deg3);
+    void move(long steps1, long steps2, long steps3=0, long steps4=0);
+    void rotate(int deg1, int deg2, int deg3=0, int deg4=0){
+        rotate((long)deg1, (long)deg2, (long)deg3, (long)deg4);
     };
-    void rotate(long deg1, long deg2, long deg3=0);
-    void rotate(double deg1, double deg2, double deg3=0);
+    void rotate(long deg1, long deg2, long deg3=0, long deg4=0);
+    void rotate(double deg1, double deg2, double deg3=0, double deg4=0);
 
     /*
      * Motor movement with external control of timing
      */
-    virtual void startMove(long steps1, long steps2, long steps3=0);
-    void startRotate(int deg1, int deg2, int deg3=0){
-        startRotate((long)deg1, (long)deg2, (long)deg3);
+    virtual void startMove(long steps1, long steps2, long steps3=0, long steps4=0);
+    void startRotate(int deg1, int deg2, int deg3=0, int deg4=0){
+        startRotate((long)deg1, (long)deg2, (long)deg3, (long)deg3);
     };
-    void startRotate(long deg1, long deg2, long deg3=0);
-    void startRotate(double deg1, double deg2, double deg3=0);
+    void startRotate(long deg1, long deg2, long deg3=0, long deg4=0);
+    void startRotate(double deg1, double deg2, double deg3=0, double deg4=0);
     /*
      * Toggle step and return time until next change is needed (micros)
      */
@@ -89,6 +95,10 @@ public:
      * Optionally, call this to begin braking to stop early
      */
     void startBrake(void);
+    /*
+     * Optionally, call this to stop
+     */
+    void stop(void);
     /*
      * State querying
      */

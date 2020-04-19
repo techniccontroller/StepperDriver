@@ -247,5 +247,16 @@ public:
     long calcStepsForRotation(double deg){
         return deg * motor_steps * microsteps / 360;
     }
+
+    double calcRotationForSteps(long steps){
+        return (steps * 360.0) / (motor_steps * microsteps);
+    }
+
+    void resetStepsCompleted(){
+		if(getCurrentState() == STOPPED){
+			step_count = 0;
+		}
+	}
+    
 };
 #endif // STEPPER_DRIVER_BASE_H

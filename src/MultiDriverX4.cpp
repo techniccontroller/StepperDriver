@@ -8,15 +8,15 @@
  * 
  * modified by techniccontroller 19.04.2020
  */
-#include "MultiDriver.h"
+#include "MultiDriverX4.h"
 
 #define FOREACH_MOTOR(action) for (short i=count-1; i >= 0; i--){action;}
 
 /*
  * Initialize motor parameters
  */
-void MultiDriver::startMove(long steps1, long steps2, long steps3){
-    long steps[3] = {steps1, steps2, steps3};
+void MultiDriverX4::startMove(long steps1, long steps2, long steps3, long steps4){
+    long steps[4] = {steps1, steps2, steps3, steps4};
     /*
      * Initialize state for all active motors
      */
@@ -35,7 +35,7 @@ void MultiDriver::startMove(long steps1, long steps2, long steps3){
 /*
  * Trigger next step action
  */
-long MultiDriver::nextAction(void){
+long MultiDriverX4::nextAction(void){
     Motor::delayMicros(next_action_interval, last_action_end);
 
     // TODO: unroll these loops
@@ -64,7 +64,7 @@ long MultiDriver::nextAction(void){
 /*
  * Optionally, call this to begin braking to stop early
  */
-void MultiDriver::startBrake(void){
+void MultiDriverX4::startBrake(void){
     FOREACH_MOTOR(
         if (event_timers[i] > 0){
             motors[i]->startBrake();
@@ -72,9 +72,19 @@ void MultiDriver::startBrake(void){
     )
 }
 /*
+ * Optionally, call this to stop
+ */
+void MultiDriverX4::stop(void){
+    FOREACH_MOTOR(
+        if (event_timers[i] > 0){
+            motors[i]->stop();
+        }
+    )
+}
+/*
  * State querying
  */
-bool MultiDriver::isRunning(void){
+bool MultiDriverX4::isRunning(void){
     bool running = false;
     FOREACH_MOTOR(
         if (motors[i]->getCurrentState() != Motor::STOPPED){
@@ -89,40 +99,40 @@ bool MultiDriver::isRunning(void){
  * Move each motor the requested number of steps, in parallel
  * positive to move forward, negative to reverse, 0 to remain still
  */
-void MultiDriver::move(long steps1, long steps2, long steps3){
-    startMove(steps1, steps2, steps3);
+void MultiDriverX4::move(long steps1, long steps2, long steps3, long steps4){
+    startMove(steps1, steps2, steps3, steps4);
     while (!ready){
         nextAction();
     }
 }
 
 #define CALC_STEPS(i, deg) ((motors[i] && deg) ? motors[i]->calcStepsForRotation(deg) : 0)
-void MultiDriver::rotate(long deg1, long deg2, long deg3){
-    move(CALC_STEPS(0, deg1), CALC_STEPS(1, deg2), CALC_STEPS(2, deg3));
+void MultiDriverX4::rotate(long deg1, long deg2, long deg3, long deg4){
+    move(CALC_STEPS(0, deg1), CALC_STEPS(1, deg2), CALC_STEPS(2, deg3), CALC_STEPS(3, deg4));
 }
 
-void MultiDriver::rotate(double deg1, double deg2, double deg3){
-    move(CALC_STEPS(0, deg1), CALC_STEPS(1, deg2), CALC_STEPS(2, deg3));
+void MultiDriverX4::rotate(double deg1, double deg2, double deg3, double deg4){
+    move(CALC_STEPS(0, deg1), CALC_STEPS(1, deg2), CALC_STEPS(2, deg3), CALC_STEPS(3, deg4));
 }
 
-void MultiDriver::startRotate(long deg1, long deg2, long deg3){
-    startMove(CALC_STEPS(0, deg1), CALC_STEPS(1, deg2), CALC_STEPS(2, deg3));
+void MultiDriverX4::startRotate(long deg1, long deg2, long deg3, long deg4){
+    startMove(CALC_STEPS(0, deg1), CALC_STEPS(1, deg2), CALC_STEPS(2, deg3), CALC_STEPS(3, deg4));
 }
 
-void MultiDriver::startRotate(double deg1, double deg2, double deg3){
-    startMove(CALC_STEPS(0, deg1), CALC_STEPS(1, deg2), CALC_STEPS(2, deg3));
+void MultiDriverX4::startRotate(double deg1, double deg2, double deg3, double deg4){
+    startMove(CALC_STEPS(0, deg1), CALC_STEPS(1, deg2), CALC_STEPS(2, deg3), CALC_STEPS(3, deg4));
 }
 
-void MultiDriver::setMicrostep(unsigned microsteps){
+void MultiDriverX4::setMicrostep(unsigned microsteps){
     FOREACH_MOTOR(motors[i]->setMicrostep(microsteps));
 }
 
-void MultiDriver::enable(void){
+void MultiDriverX4::enable(void){
     FOREACH_MOTOR(motors[i]->enable());
 }
-void MultiDriver::disable(void){
+void MultiDriverX4::disable(void){
     FOREACH_MOTOR(motors[i]->disable());
 }
-void MultiDriver::setSpeedProfile(BasicStepperDriver::Mode mode, short accel, short decel){
+void MultiDriverX4::setSpeedProfile(BasicStepperDriver::Mode mode, short accel, short decel){
 	FOREACH_MOTOR(motors[i]->setSpeedProfile(mode, accel, decel));
 }
